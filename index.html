@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A comedic stopwatch with dark humor">
+    <meta name="description" content="A minimalist stopwatch with precision timing">
     <title>Time</title>
     <style>
         /* Dark theme color scheme */
@@ -296,8 +296,8 @@
     </main>
 
     <script>
-        // Dark Humor Message Collections
-        const humorMessages = {
+        // Message Collections
+        const messages = {
             // Messages when starting the timer
             startMessages: [
                 "Another moment closer to the inevitable...",
@@ -416,23 +416,23 @@
 
         // Function to get a random message from a category
         function getRandomMessage(category) {
-            if (!humorMessages[category] || humorMessages[category].length === 0) {
+            if (!messages[category] || messages[category].length === 0) {
                 return "Time continues its relentless march...";
             }
-            const messages = humorMessages[category];
-            return messages[Math.floor(Math.random() * messages.length)];
+            const categoryMessages = messages[category];
+            return categoryMessages[Math.floor(Math.random() * categoryMessages.length)];
         }
 
         // Function to get milestone message for specific time
         function getMilestoneMessage(seconds) {
-            const milestones = Object.keys(humorMessages.milestoneMessages)
+            const milestones = Object.keys(messages.milestoneMessages)
                 .map(Number)
                 .sort((a, b) => b - a); // Sort descending to check largest milestones first
             
             for (const milestone of milestones) {
-                if (seconds >= milestone && humorMessages.milestoneMessages[milestone]) {
-                    const messages = humorMessages.milestoneMessages[milestone];
-                    return messages[Math.floor(Math.random() * messages.length)];
+                if (seconds >= milestone && messages.milestoneMessages[milestone]) {
+                    const milestoneMessages = messages.milestoneMessages[milestone];
+                    return milestoneMessages[Math.floor(Math.random() * milestoneMessages.length)];
                 }
             }
             return null;
@@ -475,7 +475,7 @@
         };
 
         // localStorage persistence functions
-        const STORAGE_KEY = 'comedic-stopwatch-state';
+        const STORAGE_KEY = 'stopwatch-state';
 
         // Save state to localStorage
         function saveStateToStorage() {
