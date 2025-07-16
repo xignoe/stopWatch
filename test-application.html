@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comedic Stopwatch Test Suite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        .manual-test {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comedic Stopwatch Test Suite</h1>
+    <p>This page tests all functionality of the comedic stopwatch application.</p>
+
+    <div class="test-container">
+        <h2>Application Under Test</h2>
+        <iframe src="index.html" id="appFrame"></iframe>
+    </div>
+
+    <div class="test-container">
+        <h2>Automated Tests</h2>
+        <button onclick="runAllTests()">Run All Tests</button>
+        <button onclick="clearResults()">Clear Results</button>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>Manual Testing Checklist</h2>
+        <div class="manual-test">
+            <h3>1. Basic Stopwatch Operations</h3>
+            <ul>
+                <li>✓ Click Start button - timer should begin counting</li>
+                <li>✓ Click Stop button - timer should pause</li>
+                <li>✓ Click Start again - timer should resume from where it stopped</li>
+                <li>✓ Click Reset button - timer should return to 00:00.00</li>
+            </ul>
+        </div>
+
+        <div class="manual-test">
+            <h3>2. Lap Functionality</h3>
+            <ul>
+                <li>✓ Start timer and click Lap button - should record lap time</li>
+                <li>✓ Record multiple laps - should show numbered list</li>
+                <li>✓ Each lap should show individual lap time and dark humor message</li>
+                <li>✓ Reset should clear all lap times</li>
+            </ul>
+        </div>
+
+        <div class="manual-test">
+            <h3>3. Dark Humor Messages</h3>
+            <ul>
+                <li>✓ Start message should appear when starting timer</li>
+                <li>✓ Stop message should appear when stopping timer</li>
+                <li>✓ Lap messages should appear with each lap</li>
+                <li>✓ Reset message should appear when resetting</li>
+                <li>✓ Milestone messages should appear at 10s, 30s, 1min, etc.</li>
+            </ul>
+        </div>
+
+        <div class="manual-test">
+            <h3>4. Responsive Design</h3>
+            <ul>
+                <li>✓ Resize browser window to mobile size - layout should adapt</li>
+                <li>✓ Buttons should stack vertically on small screens</li>
+                <li>✓ Text should remain readable at all sizes</li>
+                <li>✓ Touch targets should be appropriately sized</li>
+            </ul>
+        </div>
+
+        <div class="manual-test">
+            <h3>5. localStorage Persistence</h3>
+            <ul>
+                <li>✓ Start timer, record laps, then refresh page - state should be restored</li>
+                <li>✓ Close browser tab, reopen - previous state should be restored</li>
+                <li>✓ Reset timer - localStorage should be cleared</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        function addTestResult(testName, passed, message) {
+            testResults.push({
+                name: testName,
+                passed: passed,
+                message: message,
+                timestamp: new Date().toISOString()
+            });
+            displayResults();
+        }
+
+        function displayResults() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '';
+            
+            testResults.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `test-result ${result.passed ? 'test-pass' : 'test-fail'}`;
+                div.innerHTML = `
+                    <strong>${result.passed ? '✓ PASS' : '✗ FAIL'}: ${result.name}</strong><br>
+                    ${result.message}<br>
+                    <small>Time: ${new Date(result.timestamp).toLocaleTimeString()}</small>
+                `;
+                resultsDiv.appendChild(div);
+            });
+        }
+
+        function clearResults() {
+            testResults = [];
+            document.getElementById('testResults').innerHTML = '';
+        }
+
+        // Test functions
+        function testApplicationLoads() {
+            try {
+                const iframe = document.getElementById('appFrame');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                // Check if basic elements exist
+                const timeDisplay = iframeDoc.getElementById('timeDisplay');
+                const startStopBtn = iframeDoc.getElementById('startStopBtn');
+                const lapBtn = iframeDoc.getElementById('lapBtn');
+                const resetBtn = iframeDoc.getElementById('resetBtn');
+                
+                if (timeDisplay && startStopBtn && lapBtn && resetBtn) {
+                    addTestResult('Application Load', true, 'All required DOM elements found');
+                    return true;
+                } else {
+                    addTestResult('Application Load', false, 'Missing required DOM elements');
+                    return false;
+                }
+            } catch (error) {
+                addTestResult('Application Load', false, `Error accessing iframe: ${error.message}`);
+                return false;
+            }
+        }
+
+        function testInitialState() {
+            try {
+                const iframe = document.getElementById('appFrame');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                const timeDisplay = iframeDoc.getElementById('timeDisplay');
+                const startStopBtn = iframeDoc.getElementById('startStopBtn');
+                const lapBtn = iframeDoc.getElementById('lapBtn');
+                const messageDisplay = iframeDoc.getElementById('messageDisplay');
+                
+                let passed = true;
+                let messages = [];
+                
+                // Check initial time display
+                if (timeDisplay.textContent !== '00:00.00') {
+                    passed = false;
+                    messages.push('Time display should start at 00:00.00');
+                }
+                
+                // Check initial button states
+                if (startStopBtn.textContent !== 'Start') {
+                    passed = false;
+                    messages.push('Start button should show "Start" initially');
+                }
+                
+                if (!lapBtn.disabled) {
+                    passed = false;
+                    messages.push('Lap button should be disabled initially');
+                }
+                
+                // Check message display has content
+                if (!messageDisplay.textContent || messageDisplay.textContent.trim() === '') {
+                    passed = false;
+                    messages.push('Message display should have initial content');
+                }
+                
+                addTestResult('Initial State', passed, 
+                    passed ? 'All initial states correct' : messages.join('; '));
+                return passed;
+            } catch (error) {
+                addTestResult('Initial State', false, `Error: ${error.message}`);
+                return false;
+            }
+        }
+
+        function testTimeFormatting() {
+            try {
+                const iframe = document.getElementById('appFrame');
+                const iframeWindow = iframe.contentWindow;
+                
+                // Access the formatTime function from the iframe
+                if (typeof iframeWindow.formatTime === 'function') {
+                    // Test various time formats
+                    const tests = [
+                        { input: 0, expected: '00:00.00' },
+                        { input: 1000, expected: '00:01.00' },
+                        { input: 60000, expected: '01:00.00' },
+                        { input: 61500, expected: '01:01.50' },
+                        { input: 3661500, expected: '61:01.50' }
+                    ];
+                    
+                    let allPassed = true;
+                    let failedTests = [];
+                    
+                    tests.forEach(test => {
+                        const result = iframeWindow.formatTime(test.input);
+                        if (result !== test.expected) {
+                            allPassed = false;
+                            failedTests.push(`${test.input}ms -> expected ${test.expected}, got ${result}`);
+                        }
+                    });
+                    
+                    addTestResult('Time Formatting', allPassed, 
+                        allPassed ? 'All time formatting tests passed' : `Failed: ${failedTests.join('; ')}`);
+                    return allPassed;
+                } else {
+                    addTestResult('Time Formatting', false, 'formatTime function not accessible');
+                    return false;
+                }
+            } catch (error) {
+                addTestResult('Time Formatting', false, `Error: ${error.message}`);
+                return false;
+            }
+        }
+
+        function testHumorMessages() {
+            try {
+                const iframe = document.getElementById('appFrame');
+                const iframeWindow = iframe.contentWindow;
+                
+                // Check if humor messages object exists
+                if (iframeWindow.humorMessages) {
+                    const messages = iframeWindow.humorMessages;
+                    let passed = true;
+                    let issues = [];
+                    
+                    // Check required message categories
+                    const requiredCategories = ['startMessages', 'stopMessages', 'lapMessages', 'resetMessages', 'milestoneMessages'];
+                    
+                    requiredCategories.forEach(category => {
+                        if (!messages[category] || (Array.isArray(messages[category]) && messages[category].length === 0)) {
+                            passed = false;
+                            issues.push(`Missing or empty ${category}`);
+                        }
+                    });
+                    
+                    // Check milestone messages structure
+                    if (messages.milestoneMessages) {
+                        const expectedMilestones = [10, 30, 60, 120, 300];
+                        expectedMilestones.forEach(milestone => {
+                            if (!messages.milestoneMessages[milestone] || messages.milestoneMessages[milestone].length === 0) {
+                                passed = false;
+                                issues.push(`Missing milestone messages for ${milestone}s`);
+                            }
+                        });
+                    }
+                    
+                    addTestResult('Humor Messages', passed, 
+                        passed ? 'All humor message categories present' : issues.join('; '));
+                    return passed;
+                } else {
+                    addTestResult('Humor Messages', false, 'humorMessages object not found');
+                    return false;
+                }
+            } catch (error) {
+                addTestResult('Humor Messages', false, `Error: ${error.message}`);
+                return false;
+            }
+        }
+
+        function testLocalStorageFunctions() {
+            try {
+                const iframe = document.getElementById('appFrame');
+                const iframeWindow = iframe.contentWindow;
+                
+                // Check if localStorage functions exist
+                const functions = ['saveStateToStorage', 'restoreStateFromStorage', 'clearStoredState'];
+                let passed = true;
+                let missing = [];
+                
+                functions.forEach(funcName => {
+                    if (typeof iframeWindow[funcName] !== 'function') {
+                        passed = false;
+                        missing.push(funcName);
+                    }
+                });
+                
+                addTestResult('localStorage Functions', passed, 
+                    passed ? 'All localStorage functions present' : `Missing functions: ${missing.join(', ')}`);
+                return passed;
+            } catch (error) {
+                addTestResult('localStorage Functions', false, `Error: ${error.message}`);
+                return false;
+            }
+        }
+
+        function testResponsiveCSS() {
+            try {
+                const iframe = document.getElementById('appFrame');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                // Check for responsive CSS rules
+                const stylesheets = iframeDoc.styleSheets;
+                let hasResponsiveRules = false;
+                
+                for (let i = 0; i < stylesheets.length; i++) {
+                    try {
+                        const rules = stylesheets[i].cssRules || stylesheets[i].rules;
+                        for (let j = 0; j < rules.length; j++) {
+                            if (rules[j].type === CSSRule.MEDIA_RULE) {
+                                const mediaText = rules[j].media.mediaText;
+                                if (mediaText.includes('max-width')) {
+                                    hasResponsiveRules = true;
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        // Some stylesheets may not be accessible due to CORS
+                        continue;
+                    }
+                }
+                
+                addTestResult('Responsive CSS', hasResponsiveRules, 
+                    hasResponsiveRules ? 'Media queries found for responsive design' : 'No responsive media queries detected');
+                return hasResponsiveRules;
+            } catch (error) {
+                addTestResult('Responsive CSS', false, `Error: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function runAllTests() {
+            clearResults();
+            
+            addTestResult('Test Suite Started', true, 'Running automated tests...');
+            
+            // Wait a moment for iframe to load
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Run all tests
+            testApplicationLoads();
+            testInitialState();
+            testTimeFormatting();
+            testHumorMessages();
+            testLocalStorageFunctions();
+            testResponsiveCSS();
+            
+            addTestResult('Test Suite Completed', true, 'All automated tests completed. Please run manual tests as well.');
+        }
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 2000); // Wait for iframe to load
+        });
+    </script>
+</body>
+</html>

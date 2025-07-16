@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comedic stopwatch with dark humor">
+    <title>Time</title>
+    <style>
+        /* Dark theme color scheme */
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --accent-primary: #4a9eff;
+            --accent-secondary: #6b6b6b;
+            --accent-hover: #66b3ff;
+            --border-color: #404040;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Main container */
+        .stopwatch-container {
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px var(--shadow-color);
+            border: 1px solid var(--border-color);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Header styles */
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 300;
+        }
+
+        .welcome-message {
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Timer section */
+        .timer-section {
+            margin-bottom: 2rem;
+        }
+
+        .time-display {
+            font-size: 4rem;
+            font-weight: 300;
+            font-family: 'Courier New', monospace;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(74, 158, 255, 0.3);
+            letter-spacing: 0.1em;
+        }
+
+        .message-display {
+            color: var(--text-secondary);
+            font-style: italic;
+            min-height: 1.5rem;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Controls section */
+        .controls-section {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn.primary {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .control-btn.primary:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+        }
+
+        .control-btn.secondary {
+            background-color: var(--accent-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .control-btn.secondary:hover:not(:disabled) {
+            background-color: var(--border-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .control-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        /* Laps section */
+        .laps-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .laps-list {
+            list-style: none;
+            counter-reset: lap-counter;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 8px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .laps-list:empty::after {
+            content: "No laps recorded yet...";
+            display: block;
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .laps-list li {
+            counter-increment: lap-counter;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .laps-list li:last-child {
+            border-bottom: none;
+        }
+
+        .laps-list li::before {
+            content: "Lap " counter(lap-counter);
+            font-weight: 500;
+            color: var(--accent-primary);
+        }
+
+        .lap-time {
+            font-family: 'Courier New', monospace;
+            color: var(--text-primary);
+        }
+
+        .lap-message {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-top: 0.25rem;
+        }
+
+        /* Responsive design for mobile devices */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .stopwatch-container {
+                padding: 1.5rem;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .time-display {
+                font-size: 3rem;
+            }
+
+            .controls-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .control-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .laps-list {
+                max-height: 150px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .stopwatch-container {
+                padding: 1rem;
+            }
+
+            .time-display {
+                font-size: 2.5rem;
+            }
+
+            header h1 {
+                font-size: 1.3rem;
+            }
+
+            .welcome-message {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Custom scrollbar for laps list */
+        .laps-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .laps-list::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .laps-list::-webkit-scrollbar-thumb {
+            background: var(--accent-secondary);
+            border-radius: 3px;
+        }
+
+        .laps-list::-webkit-scrollbar-thumb:hover {
+            background: var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <main class="stopwatch-container">
+        <header>
+            <h1>Time</h1>
+        </header>
+
+        <section class="timer-section">
+            <div class="time-display" id="timeDisplay">00:00.00</div>
+            <div class="message-display" id="messageDisplay">Ready to waste some time?</div>
+        </section>
+
+        <section class="controls-section">
+            <button id="startStopBtn" class="control-btn primary">Start</button>
+            <button id="lapBtn" class="control-btn secondary" disabled>Lap</button>
+            <button id="resetBtn" class="control-btn secondary">Reset</button>
+        </section>
+
+        <section class="laps-section">
+            <h2>Lap Times</h2>
+            <ol id="lapsList" class="laps-list">
+                <!-- Lap times will be added here dynamically -->
+            </ol>
+        </section>
+    </main>
+
+    <script>
+        // Dark Humor Message Collections
+        const humorMessages = {
+            // Messages when starting the timer
+            startMessages: [
+                "Another moment closer to the inevitable...",
+                "Time to watch your life tick away, one second at a time",
+                "Starting the countdown to your next existential crisis",
+                "Let's measure how long you can avoid productivity",
+                "Beginning your journey into the void of time",
+                "Time starts now... just like your regrets",
+                "Tick tock, another day closer to obsolescence",
+                "Starting the timer on your procrastination session",
+                "Let the temporal suffering commence",
+                "Time to document your descent into madness"
+            ],
+
+            // Messages when stopping the timer
+            stopMessages: [
+                "Time stopped, but your problems remain",
+                "Paused, like your motivation in life",
+                "Timer halted, dreams still crushed",
+                "Stopped counting, started contemplating",
+                "Time frozen, existential dread continues",
+                "Pause achieved, purpose still missing",
+                "Timer stopped, but time marches on relentlessly",
+                "Halted, like your career progression",
+                "Stopped timing, started questioning everything",
+                "Paused the clock, not your inevitable doom"
+            ],
+
+            // Messages for lap times
+            lapMessages: [
+                "Congratulations on your mediocrity",
+                "Another lap, another step toward the grave",
+                "Lap recorded, significance questionable",
+                "Time noted, meaning still elusive",
+                "Lap complete, life still incomplete",
+                "Another interval of existential wandering",
+                "Lap time saved, soul still lost",
+                "Recorded for posterity and pointlessness",
+                "Another measurement of your fleeting existence",
+                "Lap noted, cosmic insignificance confirmed",
+                "Time captured, dreams still escaping",
+                "Interval recorded, purpose still buffering",
+                "Lap complete, like your disillusionment",
+                "Another timestamp on your journey to nowhere"
+            ],
+
+            // Messages for time milestones
+            milestoneMessages: {
+                10: [
+                    "10 seconds of your life you'll never get back",
+                    "A whole 10 seconds closer to the end",
+                    "10 seconds: the attention span of modern society"
+                ],
+                30: [
+                    "30 seconds of pure, unadulterated time wasting",
+                    "Half a minute into your temporal abyss",
+                    "30 seconds: longer than most people's patience"
+                ],
+                60: [
+                    "One minute down, eternity to go",
+                    "60 seconds of documented procrastination",
+                    "A full minute of avoiding responsibility"
+                ],
+                120: [
+                    "2 minutes: the length of your attention span",
+                    "120 seconds of existential timing",
+                    "Two minutes closer to your inevitable fate"
+                ],
+                300: [
+                    "5 minutes: officially wasting time now",
+                    "300 seconds of documented life avoidance",
+                    "Five minutes into your temporal prison"
+                ],
+                600: [
+                    "10 minutes: time for an existential crisis",
+                    "600 seconds of pure, concentrated procrastination",
+                    "Ten minutes of your finite existence, gone"
+                ]
+            },
+
+            // Messages when resetting
+            resetMessages: [
+                "Reset complete, just like your expectations",
+                "Back to zero, where you belong",
+                "Cleared, like your sense of purpose",
+                "Reset achieved, meaning still pending",
+                "Back to nothing, your natural state",
+                "Zeroed out, like your motivation",
+                "Reset complete, existential dread remains",
+                "Back to the beginning of nowhere",
+                "Cleared the slate, kept the emptiness",
+                "Reset to zero, your comfort zone"
+            ],
+
+            // Messages for extended timing sessions
+            extendedTiming: [
+                "Still timing? Time flies when you're avoiding responsibilities",
+                "Long session detected: procrastination level expert",
+                "Extended timing: your dedication to avoiding work is admirable",
+                "Still going? Your commitment to time wasting is impressive",
+                "Long timer session: at least you're consistent at something",
+                "Extended session: time well wasted, life poorly spent",
+                "Still timing: your avoidance skills are truly remarkable",
+                "Long session detected: professional procrastinator status achieved"
+            ],
+
+            // Welcome/default messages
+            welcomeMessages: [
+                "Ready to waste some time?",
+                "Your existential timing companion awaits",
+                "Prepared to document your descent into temporal madness?",
+                "Ready to measure the meaninglessness?",
+                "Time to time the timeless void of existence"
+            ]
+        };
+
+        // Function to get a random message from a category
+        function getRandomMessage(category) {
+            if (!humorMessages[category] || humorMessages[category].length === 0) {
+                return "Time continues its relentless march...";
+            }
+            const messages = humorMessages[category];
+            return messages[Math.floor(Math.random() * messages.length)];
+        }
+
+        // Function to get milestone message for specific time
+        function getMilestoneMessage(seconds) {
+            const milestones = Object.keys(humorMessages.milestoneMessages)
+                .map(Number)
+                .sort((a, b) => b - a); // Sort descending to check largest milestones first
+            
+            for (const milestone of milestones) {
+                if (seconds >= milestone && humorMessages.milestoneMessages[milestone]) {
+                    const messages = humorMessages.milestoneMessages[milestone];
+                    return messages[Math.floor(Math.random() * messages.length)];
+                }
+            }
+            return null;
+        }
+
+        // Function to get contextual lap message based on lap time
+        function getContextualLapMessage(lapTimeMs, lapNumber) {
+            const lapTimeSeconds = lapTimeMs / 1000;
+            
+            // Special messages for very fast or slow laps
+            if (lapTimeSeconds < 5) {
+                const fastMessages = [
+                    "Impressive speed, shame about everything else",
+                    "Fast lap, slow life progress",
+                    "Quick timing, questionable life choices"
+                ];
+                return fastMessages[Math.floor(Math.random() * fastMessages.length)];
+            } else if (lapTimeSeconds > 60) {
+                const slowMessages = [
+                    "Taking your time, like life is taking yours",
+                    "Slow and steady loses the race of life",
+                    "Leisurely pace, existential space"
+                ];
+                return slowMessages[Math.floor(Math.random() * slowMessages.length)];
+            }
+            
+            // Default lap message
+            return getRandomMessage('lapMessages');
+        }
+
+        // Core Stopwatch State Management
+        let stopwatchState = {
+            startTime: null,           // Timestamp when started (using performance.now())
+            elapsedTime: 0,           // Total elapsed milliseconds
+            isRunning: false,         // Current running state
+            lapTimes: [],             // Array of lap records
+            currentMessage: '',       // Current humor message
+            displayInterval: null,    // Interval ID for display updates
+            lastMilestoneCheck: 0     // Last milestone time checked
+        };
+
+        // localStorage persistence functions
+        const STORAGE_KEY = 'comedic-stopwatch-state';
+
+        // Save state to localStorage
+        function saveStateToStorage() {
+            try {
+                const stateToSave = {
+                    elapsedTime: getCurrentElapsedTime(),
+                    isRunning: stopwatchState.isRunning,
+                    lapTimes: stopwatchState.lapTimes,
+                    currentMessage: stopwatchState.currentMessage,
+                    lastMilestoneCheck: stopwatchState.lastMilestoneCheck,
+                    savedAt: Date.now() // Timestamp when state was saved
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+            } catch (error) {
+                console.warn('Failed to save state to localStorage:', error);
+                // Graceful degradation - continue without persistence
+            }
+        }
+
+        // Restore state from localStorage
+        function restoreStateFromStorage() {
+            try {
+                const savedState = localStorage.getItem(STORAGE_KEY);
+                if (!savedState) {
+                    return false; // No saved state found
+                }
+
+                const parsedState = JSON.parse(savedState);
+                
+                // Restore non-running state only (don't auto-resume running timers)
+                stopwatchState.elapsedTime = parsedState.elapsedTime || 0;
+                stopwatchState.lapTimes = parsedState.lapTimes || [];
+                stopwatchState.currentMessage = parsedState.currentMessage || '';
+                stopwatchState.lastMilestoneCheck = parsedState.lastMilestoneCheck || 0;
+                
+                // Don't restore running state - always start in stopped state
+                stopwatchState.isRunning = false;
+                stopwatchState.startTime = null;
+                
+                return true; // Successfully restored state
+            } catch (error) {
+                console.warn('Failed to restore state from localStorage:', error);
+                return false; // Failed to restore, use default state
+            }
+        }
+
+        // Clear saved state from localStorage
+        function clearStoredState() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (error) {
+                console.warn('Failed to clear stored state:', error);
+                // Continue silently - not critical
+            }
+        }
+
+        // DOM element references
+        const timeDisplay = document.getElementById('timeDisplay');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const startStopBtn = document.getElementById('startStopBtn');
+        const lapBtn = document.getElementById('lapBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Time formatting function for MM:SS.MS display
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const centiseconds = Math.floor((milliseconds % 1000) / 10);
+            
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+        }
+
+        // Get current elapsed time
+        function getCurrentElapsedTime() {
+            if (!stopwatchState.isRunning) {
+                return stopwatchState.elapsedTime;
+            }
+            return stopwatchState.elapsedTime + (performance.now() - stopwatchState.startTime);
+        }
+
+        // Update the time display
+        function updateTimeDisplay() {
+            const currentTime = getCurrentElapsedTime();
+            timeDisplay.textContent = formatTime(currentTime);
+            
+            // Check for milestone messages
+            const currentSeconds = Math.floor(currentTime / 1000);
+            if (currentSeconds > stopwatchState.lastMilestoneCheck) {
+                const milestoneMessage = getMilestoneMessage(currentSeconds);
+                if (milestoneMessage) {
+                    messageDisplay.textContent = milestoneMessage;
+                    stopwatchState.currentMessage = milestoneMessage;
+                    stopwatchState.lastMilestoneCheck = currentSeconds;
+                }
+            }
+        }
+
+        // Start stopwatch function
+        function startStopwatch() {
+            if (stopwatchState.isRunning) {
+                return; // Already running
+            }
+            
+            stopwatchState.isRunning = true;
+            stopwatchState.startTime = performance.now();
+            
+            // Update UI
+            startStopBtn.textContent = 'Stop';
+            startStopBtn.className = 'control-btn secondary';
+            lapBtn.disabled = false;
+            
+            // Display start message
+            const startMessage = getRandomMessage('startMessages');
+            messageDisplay.textContent = startMessage;
+            stopwatchState.currentMessage = startMessage;
+            
+            // Save state to localStorage
+            saveStateToStorage();
+            
+            // Start display update interval
+            stopwatchState.displayInterval = setInterval(updateTimeDisplay, 10); // Update every 10ms for smooth display
+        }
+
+        // Stop stopwatch function
+        function stopStopwatch() {
+            if (!stopwatchState.isRunning) {
+                return; // Already stopped
+            }
+            
+            // Update elapsed time before stopping
+            stopwatchState.elapsedTime = getCurrentElapsedTime();
+            stopwatchState.isRunning = false;
+            stopwatchState.startTime = null;
+            
+            // Clear display update interval
+            if (stopwatchState.displayInterval) {
+                clearInterval(stopwatchState.displayInterval);
+                stopwatchState.displayInterval = null;
+            }
+            
+            // Update UI
+            startStopBtn.textContent = 'Start';
+            startStopBtn.className = 'control-btn primary';
+            lapBtn.disabled = true;
+            
+            // Display stop message
+            const stopMessage = getRandomMessage('stopMessages');
+            messageDisplay.textContent = stopMessage;
+            stopwatchState.currentMessage = stopMessage;
+            
+            // Save state to localStorage
+            saveStateToStorage();
+            
+            // Final time display update
+            updateTimeDisplay();
+        }
+
+        // Lap recording function that captures current time
+        function recordLap() {
+            if (!stopwatchState.isRunning) {
+                return; // Can only record laps while running
+            }
+            
+            const currentTime = getCurrentElapsedTime();
+            const lapNumber = stopwatchState.lapTimes.length + 1;
+            
+            // Calculate lap time (time since last lap or start)
+            const previousLapTime = stopwatchState.lapTimes.length > 0 
+                ? stopwatchState.lapTimes[stopwatchState.lapTimes.length - 1].totalTime 
+                : 0;
+            const lapTime = currentTime - previousLapTime;
+            
+            // Get contextual lap message
+            const lapMessage = getContextualLapMessage(lapTime, lapNumber);
+            
+            // Create lap record
+            const lapRecord = {
+                lapNumber: lapNumber,
+                totalTime: currentTime,     // Total elapsed time at this lap
+                lapTime: lapTime,          // Time for this specific lap
+                message: lapMessage
+            };
+            
+            // Add to lap times array
+            stopwatchState.lapTimes.push(lapRecord);
+            
+            // Update lap display
+            updateLapDisplay();
+            
+            // Display lap message
+            messageDisplay.textContent = lapMessage;
+            stopwatchState.currentMessage = lapMessage;
+            
+            // Save state to localStorage
+            saveStateToStorage();
+        }
+
+        // Update lap display functionality with numbered list
+        function updateLapDisplay() {
+            const lapsList = document.getElementById('lapsList');
+            
+            // Clear existing laps
+            lapsList.innerHTML = '';
+            
+            // Add each lap to the list
+            stopwatchState.lapTimes.forEach((lap, index) => {
+                const lapItem = document.createElement('li');
+                
+                // Create lap time display
+                const lapTimeSpan = document.createElement('span');
+                lapTimeSpan.className = 'lap-time';
+                lapTimeSpan.textContent = formatTime(lap.lapTime);
+                
+                // Create lap message display
+                const lapMessageDiv = document.createElement('div');
+                lapMessageDiv.className = 'lap-message';
+                lapMessageDiv.textContent = lap.message;
+                
+                // Create container for lap info
+                const lapInfoDiv = document.createElement('div');
+                lapInfoDiv.appendChild(lapTimeSpan);
+                lapInfoDiv.appendChild(lapMessageDiv);
+                
+                lapItem.appendChild(lapInfoDiv);
+                lapsList.appendChild(lapItem);
+            });
+        }
+
+        // Reset stopwatch function
+        function resetStopwatch() {
+            // Stop if running
+            if (stopwatchState.isRunning) {
+                stopStopwatch();
+            }
+            
+            // Reset all state
+            stopwatchState.elapsedTime = 0;
+            stopwatchState.lapTimes = [];
+            stopwatchState.lastMilestoneCheck = 0;
+            
+            // Update UI
+            timeDisplay.textContent = '00:00.00';
+            startStopBtn.textContent = 'Start';
+            startStopBtn.className = 'control-btn primary';
+            lapBtn.disabled = true;
+            
+            // Display reset message
+            const resetMessage = getRandomMessage('resetMessages');
+            messageDisplay.textContent = resetMessage;
+            stopwatchState.currentMessage = resetMessage;
+            
+            // Clear laps list
+            const lapsList = document.getElementById('lapsList');
+            lapsList.innerHTML = '';
+            
+            // Clear stored state from localStorage
+            clearStoredState();
+        }
+
+        // Toggle start/stop function
+        function toggleStartStop() {
+            if (stopwatchState.isRunning) {
+                stopStopwatch();
+            } else {
+                startStopwatch();
+            }
+        }
+
+        // Event listeners for button interactions
+        startStopBtn.addEventListener('click', toggleStartStop);
+        lapBtn.addEventListener('click', recordLap);
+        resetBtn.addEventListener('click', resetStopwatch);
+
+        // Initialize the application
+        function initializeApp() {
+            // Try to restore state from localStorage
+            const stateRestored = restoreStateFromStorage();
+            
+            if (stateRestored) {
+                // State was restored, update UI to match restored state
+                updateTimeDisplay();
+                updateLapDisplay();
+                
+                // Display restored message or fallback to welcome message
+                if (stopwatchState.currentMessage) {
+                    messageDisplay.textContent = stopwatchState.currentMessage;
+                } else {
+                    const welcomeMessage = getRandomMessage('welcomeMessages');
+                    messageDisplay.textContent = welcomeMessage;
+                    stopwatchState.currentMessage = welcomeMessage;
+                }
+                
+                // Ensure UI buttons are in correct state (always start in stopped state)
+                startStopBtn.textContent = 'Start';
+                startStopBtn.className = 'control-btn primary';
+                lapBtn.disabled = true;
+            } else {
+                // No saved state, use default initialization
+                const welcomeMessage = getRandomMessage('welcomeMessages');
+                messageDisplay.textContent = welcomeMessage;
+                stopwatchState.currentMessage = welcomeMessage;
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
